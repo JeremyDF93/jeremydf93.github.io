@@ -49,51 +49,14 @@
     <div class="info-center">
       <div class="card text-center">
         <div class="card-body">
-          <h5 class="card-title">Sorry</h5>
-          <p class="card-text">Due to personal issues and income <code>fluffboi.com</code>, <code>praisethemoon.com</code>, <code>raccoongirl.org</code> and <code>ralsei.org</code> are currently down.</p>
-          <p class="card-text">If you'd like to see those servers back up or just want to help me out, please consider donating below.</p>
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <a href="http://paypal.me/JeremyDF93" class="btn btn-primary">PayPal</a>
-            </div>
-            <input type="text" class="form-control" value="37Qxcj2S7UYbqmhUxB2ndFUrK73Ct6DQh3" aria-label="37Qxcj2S7UYbqmhUxB2ndFUrK73Ct6DQh3" disabled>
-            <div class="input-group-append">
-              <button class="btn btn-warning" type="button" id="bitcoin" data-copy="37Qxcj2S7UYbqmhUxB2ndFUrK73Ct6DQh3">BitCoin</button>
-            </div>
-          </div>
+          <h5 class="card-title">OwO</h5>
+          <p class="card-text">What's this?</p>
         </div>
       </div>
-    </div>
-    <div class="fixed-bottom text-center text-muted">
-      <a href = "mailto:admin@praisethemoon.com">Contact</a>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-    <script>
-      $("#bitcoin").click(function() {
-        $bitcoin = $("#bitcoin");
-        copyToClipboard($bitcoin.data("copy"));
-
-        $bitcoin.tooltip({
-          placement: "bottom",
-          title: "Copied!",
-          trigger: "manual"
-        });
-        $bitcoin.tooltip("show");
-        setTimeout(function() {
-          $bitcoin.tooltip("hide");
-        }, 3e3);
-      });
-
-      function copyToClipboard(text) {
-        var $temp = $("<input>");
-        $("body").append($temp);
-        $temp.val(text).select();
-        document.execCommand("copy");
-        $temp.remove();
-      }
-    </script>
   </body>
 </html>
