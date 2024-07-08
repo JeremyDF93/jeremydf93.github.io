@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwi</title>
+    <title>A Disappointment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #000;
             color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: "Space Mono", monospace;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,7 +19,6 @@
             margin: 0;
             animation: fadein 2s;
         }
-
         @keyframes fadein {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -37,16 +39,19 @@
             white-space: nowrap;
             overflow: hidden;
             position: relative;
+            letter-spacing: 0.1em;
         }
         .typing::after {
             content: '';
             display: inline-block;
             background-color: #00ff00;
-            width: 18px; /* Adjust width to match the font size */
-            height: 1em; /* Adjust height to match the font size */
+            width: 0.75em; /* Adjust width to match the font size */
+            height: 2em; /* Adjust height to match the font size */
             position: absolute;
             right: 0;
-            animation: blink 1s infinite;
+        }
+        .typing.blink::after {
+            animation: blink 1s steps(1) infinite;
         }
         @keyframes blink {
             0% { opacity: 1; }
@@ -64,15 +69,19 @@
         let index = 0;
 
         function type() {
+            const textElement = document.getElementById("text");
+            textElement.classList.remove('blink');
             if (index < text.length) {
-                document.getElementById("text").innerHTML += text.charAt(index) === ' ' ? '&nbsp;' : text.charAt(index);
+                textElement.innerHTML += text.charAt(index) === ' ' ? '&nbsp;' : text.charAt(index);
                 index++;
                 setTimeout(type, 100); // Adjust typing speed here
+            } else {
+                textElement.classList.add('blink');
             }
         }
 
         window.onload = function() {
-            setTimeout(type, 500)
+            setTimeout(type, 500);
         };
     </script>
 </body>
