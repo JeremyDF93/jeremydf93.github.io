@@ -8,7 +8,9 @@
 <meta property="og:title" content="Nyxium Network Systems">
 <meta property="og:type" content="website">
 <meta property="og:description" content="Central Administration Panel and Systems Dashboard.">
-<meta name="theme-color" content="#45ff00"> <meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#45ff00">
+
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Nyxium Network Systems">
 <meta name="twitter:description" content="Central Administration Panel and Systems Dashboard.">
 
@@ -22,73 +24,33 @@
     width: 100%;
     height: 100%;
     background-color: #0b0c10;
-    overflow-x: hidden; /* Allow vertical scrolling, prevent horizontal */
+    overflow-x: hidden; 
     font-family: 'VT323', monospace;
-    color: #45ff00; /* Classic terminal green */
+    color: #45ff00; 
     font-size: 1.6rem;
   }
 
-  /* CRT container for curved screen effect */
-  .crt-screen {
-    width: 100%;
-    min-height: 100vh;
-    position: relative;
-    padding: 2rem;
-    box-sizing: border-box;
-    text-shadow: 0 0 6px rgba(69, 255, 0, 0.6);
-  }
-
-  /* Scanlines overlay */
-  .crt-screen::before {
-    content: " ";
-    display: block;
-    position: fixed; /* Fixed so they don't scroll away */
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    z-index: 2;
-    background-size: 100% 4px, 6px 100%;
-    pointer-events: none;
-  }
-
-  /* Subtle screen flicker */
-  .crt-screen::after {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: rgba(18, 16, 16, 0.1);
-    opacity: 0;
-    z-index: 2;
-    pointer-events: none;
-    animation: flicker 0.15s infinite;
-  }
-
-  @keyframes flicker {
-    0% { opacity: 0.015; }
-    50% { opacity: 0.04; }
-    100% { opacity: 0.015; }
-  }
-
+  /* The actual text container */
   .terminal-content {
     position: relative;
-    z-index: 3;
+    z-index: 1; /* Lowest layer */
     display: flex;
     flex-direction: column;
-    padding-bottom: 2rem; /* Buffer at the bottom */
+    padding: 2rem;
+    padding-bottom: 4rem; 
+    
+    /* RGB Chromatic Aberration + Green Phosphor Glow */
+    text-shadow: 
+      1px 0 0 rgba(255, 0, 0, 0.7), 
+      -1px 0 0 rgba(0, 0, 255, 0.7), 
+      0 0 8px rgba(69, 255, 0, 0.8);
   }
 
   .line {
     margin: 0.15rem 0;
     white-space: pre-wrap;
     line-height: 1.2;
-    word-wrap: break-word; /* Ensure long lines wrap on mobile */
+    word-wrap: break-word; 
   }
 
   /* The blinking block cursor */
@@ -99,7 +61,7 @@
     background-color: #45ff00;
     animation: blink 1s step-end infinite;
     vertical-align: bottom;
-    box-shadow: 0 0 6px rgba(69, 255, 0, 0.6);
+    box-shadow: 0 0 8px rgba(69, 255, 0, 0.8);
     margin-left: 2px;
   }
 
@@ -108,15 +70,60 @@
     50% { opacity: 0; }
   }
 
-  /* Status Colors */
+  /* Status Colors with their own RGB aberrations */
   .error {
     color: #ff3333;
-    text-shadow: 0 0 6px rgba(255, 51, 51, 0.6);
+    text-shadow: 
+      1px 0 0 rgba(0, 255, 0, 0.5), 
+      -1px 0 0 rgba(0, 0, 255, 0.5), 
+      0 0 8px rgba(255, 51, 51, 0.8);
   }
   
   .warning {
     color: #ffb000;
-    text-shadow: 0 0 6px rgba(255, 176, 0, 0.6);
+    text-shadow: 
+      1px 0 0 rgba(255, 0, 0, 0.5), 
+      -1px 0 0 rgba(0, 255, 0, 0.5), 
+      0 0 8px rgba(255, 176, 0, 0.8);
+  }
+
+  /* ========================================= */
+  /* CRT OVERLAYS - Sitting OVER the text      */
+  /* ========================================= */
+
+  /* 1. The Scanline & RGB Pixel Mesh */
+  .scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9998; /* High z-index to sit over text */
+    pointer-events: none; /* Lets you click/scroll through it */
+    background: 
+      linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+      linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 6px 100%;
+  }
+
+  /* 2. Curved Screen Shadow (Vignette) & Flicker */
+  .vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999; /* Highest z-index */
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+    animation: flicker 0.15s infinite;
+  }
+
+  @keyframes flicker {
+    0% { opacity: 0.98; }
+    50% { opacity: 1; }
+    100% { opacity: 0.98; }
   }
 
   /* Mobile Responsiveness */
@@ -124,7 +131,7 @@
     body, html {
       font-size: 1.1rem;
     }
-    .crt-screen {
+    .terminal-content {
       padding: 1rem;
     }
     .cursor {
@@ -136,15 +143,15 @@
 </head>
 <body>
 
-<div class="crt-screen">
-  <div class="terminal-content">
-    <div id="output"></div>
-    <div><span id="typing-line"></span><span class="cursor" id="cursor"></span></div>
-  </div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<div class="terminal-content">
+  <div id="output"></div>
+  <div><span id="typing-line"></span><span class="cursor" id="cursor"></span></div>
 </div>
 
 <script>
-  // Hyper-realistic custom boot sequence
   const bootSequence = [
     "Arch Linux Boot Loader v3.11",
     "Host: kiwi",
@@ -170,7 +177,6 @@
     "Searching for restore point..."
   ];
 
-  // The final devastating blow
   const finalMessage = "No functional state ever existed for [kiwi].";
   
   const outputDiv = document.getElementById('output');
@@ -178,14 +184,12 @@
   
   let lineIndex = 0;
 
-  // Prints the boot sequence block by block
   function printBootLines() {
     if (lineIndex < bootSequence.length) {
       const lineText = bootSequence[lineIndex];
       const lineElem = document.createElement('div');
       lineElem.className = 'line';
       
-      // Color coding for dramatic effect
       if (lineText.includes('ERROR') || lineText.includes('[FAILED]') || lineText.includes('Kernel panic')) {
         lineElem.classList.add('error');
       } else if (lineText.includes('WARNING')) {
@@ -195,21 +199,17 @@
       lineElem.textContent = lineText;
       outputDiv.appendChild(lineElem);
       
-      // Auto-scroll to bottom as new lines appear
       window.scrollTo(0, document.body.scrollHeight);
 
       lineIndex++;
       
-      // Randomize the delay to simulate processing
       const delay = lineText === "..." ? 1400 : (Math.random() * 300 + 50);
       setTimeout(printBootLines, delay);
     } else {
-      // Long pause before delivering the final text
       setTimeout(typeFinalMessage, 1800);
     }
   }
 
-  // Types out the final punchline character by character
   function typeFinalMessage() {
     const spacing = document.createElement('div');
     spacing.innerHTML = '<br>';
@@ -222,10 +222,8 @@
         typingLine.textContent += finalMessage.charAt(charIndex);
         charIndex++;
         
-        // Auto-scroll to bottom while typing
         window.scrollTo(0, document.body.scrollHeight);
         
-        // Pause slightly on punctuation
         let nextDelay = 80;
         if (finalMessage.charAt(charIndex - 1) === '.') {
             nextDelay = 800; 
@@ -238,7 +236,6 @@
     typeChar();
   }
 
-  // Kick everything off a second after the page loads
   window.onload = () => {
     setTimeout(printBootLines, 1000);
   };
