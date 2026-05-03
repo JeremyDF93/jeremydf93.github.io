@@ -1,88 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwi</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #000;
-            color: #00ff00;
-            font-family: "Space Mono", monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            animation: fadein 2s;
-        }
-        @keyframes fadein {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .container {
-            border: 2px solid #00ff00;
-            padding: 20px;
-            text-align: center;
-            animation: flicker 2s infinite alternate;
-        }
-        @keyframes flicker {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
-        .typing {
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            position: relative;
-            letter-spacing: 0.1em;
-        }
-        .typing::after {
-            content: '';
-            display: inline-block;
-            background-color: #00ff00;
-            width: 0.75em; /* Adjust width to match the font size */
-            height: 2em; /* Adjust height to match the font size */
-            position: absolute;
-            right: 0;
-        }
-        .typing.blink::after {
-            animation: blink 1s steps(1) infinite;
-        }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Boot Sequence</title>
+<style>
+  /* Import a retro 8-bit style font */
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0b0c10;
+    overflow-x: hidden; /* Allow vertical scrolling, prevent horizontal */
+    font-family: 'VT323', monospace;
+    color: #45ff00; /* Classic terminal green */
+    font-size: 1.6rem;
+  }
+
+  /* CRT container for curved screen effect */
+  .crt-screen {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    padding: 2rem;
+    box-sizing: border-box;
+    text-shadow: 0 0 6px rgba(69, 255, 0, 0.6);
+  }
+
+  /* Scanlines overlay */
+  .crt-screen::before {
+    content: " ";
+    display: block;
+    position: fixed; /* Fixed so they don't scroll away */
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 4px, 6px 100%;
+    pointer-events: none;
+  }
+
+  /* Subtle screen flicker */
+  .crt-screen::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(18, 16, 16, 0.1);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
+  }
+
+  @keyframes flicker {
+    0% { opacity: 0.015; }
+    50% { opacity: 0.04; }
+    100% { opacity: 0.015; }
+  }
+
+  .terminal-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 2rem; /* Buffer at the bottom */
+  }
+
+  .line {
+    margin: 0.15rem 0;
+    white-space: pre-wrap;
+    line-height: 1.2;
+    word-wrap: break-word; /* Ensure long lines wrap on mobile */
+  }
+
+  /* The blinking block cursor */
+  .cursor {
+    display: inline-block;
+    width: 12px;
+    height: 1.2rem;
+    background-color: #45ff00;
+    animation: blink 1s step-end infinite;
+    vertical-align: bottom;
+    box-shadow: 0 0 6px rgba(69, 255, 0, 0.6);
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Status Colors */
+  .error {
+    color: #ff3333;
+    text-shadow: 0 0 6px rgba(255, 51, 51, 0.6);
+  }
+  
+  .warning {
+    color: #ffb000;
+    text-shadow: 0 0 6px rgba(255, 176, 0, 0.6);
+  }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 768px) {
+    body, html {
+      font-size: 1.1rem;
+    }
+    .crt-screen {
+      padding: 1rem;
+    }
+    .cursor {
+      height: 0.9rem;
+      width: 8px;
+    }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="typing" id="text"></h1>
-    </div>
-    <script>
-        const text = "A Disappointment ";
-        let index = 0;
 
-        function type() {
-            const textElement = document.getElementById("text");
-            textElement.classList.remove('blink');
-            if (index < text.length) {
-                textElement.innerHTML += text.charAt(index) === ' ' ? '&nbsp;' : text.charAt(index);
-                index++;
-                setTimeout(type, 100); // Adjust typing speed here
-            } else {
-                textElement.classList.add('blink');
-            }
+<div class="crt-screen">
+  <div class="terminal-content">
+    <div id="output"></div>
+    <div><span id="typing-line"></span><span class="cursor" id="cursor"></span></div>
+  </div>
+</div>
+
+<script>
+  // Hyper-realistic custom boot sequence
+  const bootSequence = [
+    "Arch Linux Boot Loader v3.11",
+    "Host: arch2-1",
+    "Hardware detection initiated...",
+    "GPU: NVIDIA GeForce RTX 4090 found.",
+    "",
+    "[  OK  ] Mounting file systems...",
+    "[  OK  ] Loading AI image datasets...",
+    "[  OK  ] Compiling Udon VRChat scripts...",
+    "[FAILED] Initializing pfSense network...",
+    "ERROR: Management IP incorrectly requesting DHCP from tagged VLAN 10.",
+    "Bypassing network protocol...",
+    "",
+    "Diagnosing power systems...",
+    "Querying APC Smart-UPS via USB...",
+    "WARNING: Battery capacity at 4%.",
+    "Power redundancy non-existent. Living on the edge.",
+    "",
+    "Attempting to load site administrator profile...",
+    "Kernel panic - not syncing: Motivation core not found. Dumping memory...",
+    "",
+    "Memory successfully dumped...",
+    "Searching for restore point..."
+  ];
+
+  // The final devastating blow
+  const finalMessage = "No functional state ever existed for [kiwi].";
+  
+  const outputDiv = document.getElementById('output');
+  const typingLine = document.getElementById('typing-line');
+  
+  let lineIndex = 0;
+
+  // Prints the boot sequence block by block
+  function printBootLines() {
+    if (lineIndex < bootSequence.length) {
+      const lineText = bootSequence[lineIndex];
+      const lineElem = document.createElement('div');
+      lineElem.className = 'line';
+      
+      // Color coding for dramatic effect
+      if (lineText.includes('ERROR') || lineText.includes('[FAILED]') || lineText.includes('Kernel panic')) {
+        lineElem.classList.add('error');
+      } else if (lineText.includes('WARNING')) {
+        lineElem.classList.add('warning');
+      }
+
+      lineElem.textContent = lineText;
+      outputDiv.appendChild(lineElem);
+      
+      // Auto-scroll to bottom as new lines appear
+      window.scrollTo(0, document.body.scrollHeight);
+
+      lineIndex++;
+      
+      // Randomize the delay to simulate processing
+      const delay = lineText === "..." ? 1400 : (Math.random() * 300 + 50);
+      setTimeout(printBootLines, delay);
+    } else {
+      // Long pause before delivering the final text
+      setTimeout(typeFinalMessage, 1800);
+    }
+  }
+
+  // Types out the final punchline character by character
+  function typeFinalMessage() {
+    const spacing = document.createElement('div');
+    spacing.innerHTML = '<br>';
+    outputDiv.appendChild(spacing);
+
+    let charIndex = 0;
+    
+    function typeChar() {
+      if (charIndex < finalMessage.length) {
+        typingLine.textContent += finalMessage.charAt(charIndex);
+        charIndex++;
+        
+        // Auto-scroll to bottom while typing
+        window.scrollTo(0, document.body.scrollHeight);
+        
+        // Pause slightly on punctuation
+        let nextDelay = 80;
+        if (finalMessage.charAt(charIndex - 1) === '.') {
+            nextDelay = 800; 
         }
 
-        window.onload = function() {
-            setTimeout(type, 500);
-        };
-    </script>
+        setTimeout(typeChar, nextDelay);
+      }
+    }
+    
+    typeChar();
+  }
+
+  // Kick everything off a second after the page loads
+  window.onload = () => {
+    setTimeout(printBootLines, 1000);
+  };
+</script>
 </body>
 </html>
