@@ -73,6 +73,29 @@ function printBootLines() {
   }
 }
 
+function printImage(url) {
+  const img = document.createElement('img');
+  img.src = url;
+  img.className = 'terminal-img';
+  
+  // Create a wrapper to help with spacing
+  const wrapper = document.createElement('div');
+  wrapper.className = 'line';
+  wrapper.appendChild(img);
+  outputDiv.appendChild(wrapper);
+
+  // Wait for the image to actually have dimensions before trimming
+  img.onload = () => {
+    trimBuffer();
+  };
+  
+  // If the image fails to load, print an error
+  img.onerror = () => {
+    printLine(`ERROR: Could not render visual data from ${url}`, "error");
+    wrapper.remove();
+  };
+}
+
 function typeFinalMessage() {
   printLine(""); 
   const finalElem = document.createElement('div');
@@ -226,8 +249,18 @@ async function processCommand(cmd) {
       break;
     case 'nyx':
     case 'furry':
-      printLine("Species: Unknown Hybrid.");
-      printLine("Status: Needs more fluff.", "warning");
+      printLine(`Loading visual data...`);
+      await sleep(1000);
+      printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
+      break;
+    case 'image':
+      if (args[1]) {
+        printLine(`Loading visual data from ${args[1]}...`);
+        await sleep(1000);
+        printImage(args[1]);
+      } else {
+        printLine("Usage: image [url]", "error");
+      }
       break;
     default:
       printLine(`bash: ${mainCmd}: command not found`, "error");

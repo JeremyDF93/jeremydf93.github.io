@@ -31,6 +31,25 @@ body, html {
     0 0 5px rgba(69, 255, 0, 0.6);
 }
 
+.terminal-img {
+  display: block;
+  max-width: 90%; 
+  max-height: 50vh; 
+  height: auto;
+  margin: 1rem 0;
+  
+  /* REMOVED: sepia and hue-rotate */
+  /* ADDED: Subtle bloom and sharpening */
+  filter: brightness(1.1) contrast(1.1) drop-shadow(0 0 5px rgba(69, 255, 0, 0.2));
+  
+  /* Keeps pixels sharp for AI/Pixel art */
+  image-rendering: auto; 
+  
+  /* This ensures the global scanlines still 'cut' through the image */
+  position: relative;
+  z-index: 0; 
+}
+
 .line {
   white-space: pre-wrap;
   line-height: 1.3;
