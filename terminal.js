@@ -1,31 +1,36 @@
 const bootSequence = [
-  "Arch Linux Boot Loader v3.11",
-  "Host: nyxium.io",
-  "Hardware detection initiated...",
-  "GPU: NVIDIA GeForce RTX 4090 found.",
+  "Nyxium OS v3.11 (x86_64 kernel)",
+  "Initializing system hardware...",
+  "Detecting GPU....................... NVIDIA RTX 4090",
+  "Checking video memory............... 24GB [ OK ]",
+  "Setting display mode................ 8-Bit Retro [ OK ]",
   "",
-  "[  OK  ] Mounting file systems...",
-  "[  OK  ] Loading AI image datasets...",
-  "[  OK  ] Compiling Udon VRChat scripts...",
-  "[FAILED] Initializing pfSense network...",
-  "ERROR: Management IP incorrectly requesting DHCP from tagged VLAN 10.",
-  "Bypassing network protocol...",
+  "Welcome to Nyxium Network Systems",
   "",
-  "Diagnosing power systems...",
-  "Querying APC Smart-UPS via USB...",
-  "WARNING: Battery capacity at 4%.",
-  "Power redundancy non-existent. Living on the edge.",
+  "[  OK  ] Initializing system drivers.",
+  "[  OK  ] Mounting storage partitions.",
+  "[  OK  ] Starting VR network services.",
+  "[FAILED] Connecting to pfSense security uplink.",
+  "Warning: Network is running in unprotected mode.",
+  "[  OK  ] Reached target: Multi-User System.",
   "",
-  "Attempting to load site administrator profile...",
-  "Kernel panic - not syncing: Motivation core not found. Dumping memory...",
+  "[[ Power Diagnostic ]]",
+  "UPS Status: Battery at 4% capacity.",
+  "WARNING: UPS battery is degraded. Replace immediately.",
   "",
-  "Memory successfully dumped...",
-  "Searching for restore point..."
+  "[[ User Session ]]",
+  "Establishing session for: kiwi",
+  "Checking administrator permissions...",
+  "ERROR: Motivation core failed to initialize.",
+  "Kernel panic: System state is 'depressed'.",
+  "Dumping error logs to memory...",
+  "Attempting to find a restore point..."
 ];
 
 const finalMessage = "No functional state ever existed for [kiwi].";
 
 const outputDiv = document.getElementById('output');
+const contentContainer = document.querySelector('.terminal-content');
 const inputLineDiv = document.getElementById('input-line');
 const hiddenInput = document.getElementById('hidden-input');
 const cmdText = document.getElementById('cmd-text');
@@ -34,14 +39,24 @@ const cursor = document.getElementById('cursor');
 let lineIndex = 0;
 let isTerminalActive = false;
 
-// THE HARDWARE BUFFER MANAGER
-// Deletes old lines so the DOM doesn't grow infinitely
+// DYNAMIC BUFFER MANAGER
+// Checks physical pixels instead of line count
 function trimBuffer() {
-  const maxLines = 35; // Adjust this if you want more/less history kept in memory
-  while (outputDiv.childElementCount > maxLines) {
-    outputDiv.removeChild(outputDiv.firstChild);
+  // Use clientHeight for the exact "visible" inner area of the window
+  const viewportHeight = window.innerHeight;
+  
+  // While the content height is greater than the window height
+  while (contentContainer.scrollHeight > viewportHeight) {
+    if (outputDiv.firstChild) {
+      outputDiv.removeChild(outputDiv.firstChild);
+    } else {
+      break;
+    }
   }
 }
+
+// Re-trim on window resize to ensure nothing is cut off
+window.addEventListener('resize', trimBuffer);
 
 function printBootLines() {
   if (lineIndex < bootSequence.length) {
@@ -68,6 +83,7 @@ function typeFinalMessage() {
     if (charIndex < finalMessage.length) {
       finalElem.textContent += finalMessage.charAt(charIndex);
       charIndex++;
+      trimBuffer(); // Check height during typing
       
       let nextDelay = 60;
       if (finalMessage.charAt(charIndex - 1) === '.') {
@@ -94,7 +110,7 @@ function printLine(text, cssClass = '') {
   lineElem.textContent = text === "" ? '\u00A0' : text;
   
   outputDiv.appendChild(lineElem);
-  trimBuffer(); // Clean up old memory
+  trimBuffer(); 
 }
 
 function activateTerminal() {
@@ -102,6 +118,7 @@ function activateTerminal() {
   inputLineDiv.style.display = 'block';
   isTerminalActive = true;
   hiddenInput.focus();
+  trimBuffer();
 }
 
 // --- INTERACTIVE TERMINAL LOGIC ---
@@ -113,6 +130,7 @@ document.addEventListener('click', () => {
 hiddenInput.addEventListener('input', (e) => {
   cmdText.textContent = e.target.value;
   cursor.classList.add('typing');
+  trimBuffer(); // Handle overflow while user is typing a very long line
   
   clearTimeout(window.typingTimeout);
   window.typingTimeout = setTimeout(() => {
@@ -123,12 +141,11 @@ hiddenInput.addEventListener('input', (e) => {
 hiddenInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && isTerminalActive) {
     const cmd = hiddenInput.value.trim();
-    
     printLine(`kiwi@nyxium.io:~$ ${cmd}`);
     processCommand(cmd);
-    
     hiddenInput.value = '';
     cmdText.textContent = '';
+    trimBuffer();
   }
 });
 
