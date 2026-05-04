@@ -189,6 +189,24 @@ function processCommand(cmd) {
     case 'dir':
       printLine("datasets/  scripts/  broken_dreams/  tax_returns_2024.pdf");
       break;
+    case 'butts':
+    case 'dicks':
+      printLine("ERROR: Physiological assets not found in current virtual state.", "error");
+      break;
+    case 'pony':
+    case 'ponies':
+      printLine("Connecting to areweponyyet...");
+      printLine("ERR_CONNECTION_TIMED_OUT", "error");
+      break;
+    case 'lewd':
+    case 'lewds':
+      printLine("Accessing encrypted vault...");
+      printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
+      break;
+    case 'furry':
+      printLine("Species: Unknown Hybrid.");
+      printLine("Status: Needs more fluff.", "warning");
+      break;
     default:
       printLine(`bash: ${mainCmd}: command not found`, "error");
   }
