@@ -1,3 +1,5 @@
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const bootSequence = [
   "Nyxium OS v3.11 (x86_64 kernel)",
   "Initializing system hardware...",
@@ -138,22 +140,38 @@ hiddenInput.addEventListener('input', (e) => {
   }, 500);
 });
 
-hiddenInput.addEventListener('keydown', (e) => {
+// Handle hitting Enter
+hiddenInput.addEventListener('keydown', async (e) => { // Added async here
   if (e.key === 'Enter' && isTerminalActive) {
     const cmd = hiddenInput.value.trim();
+    
+    // 1. Echo the command
     printLine(`kiwi@nyxium.io:~$ ${cmd}`);
-    processCommand(cmd);
+    
+    // 2. Clear and hide the input line so it doesn't show during pauses
     hiddenInput.value = '';
     cmdText.textContent = '';
+    inputLineDiv.style.display = 'none'; 
+    isTerminalActive = false; // Lock input during processing
+
+    // 3. Wait for the command to fully finish processing
+    await processCommand(cmd);
+    
+    // 4. Bring the input line back once processing is done
+    inputLineDiv.style.display = 'block';
+    isTerminalActive = true;
+    hiddenInput.focus();
     trimBuffer();
   }
 });
 
-function processCommand(cmd) {
+async function processCommand(cmd) {
   const args = cmd.toLowerCase().split(' ');
   const mainCmd = args[0];
 
-  if (!mainCmd) return; 
+  if (!mainCmd) return;
+
+  await sleep(150);
 
   switch (mainCmd) {
     case 'help':
@@ -195,14 +213,18 @@ function processCommand(cmd) {
       break;
     case 'pony':
     case 'ponies':
-      printLine("Connecting to areweponyyet...");
+      printLine("Connecting to areweponyyet.com...");
+      await sleep(5000); // Dramatic tension
       printLine("ERR_CONNECTION_TIMED_OUT", "error");
       break;
     case 'lewd':
     case 'lewds':
+    case 'porn':
       printLine("Accessing encrypted vault...");
+      await sleep(2000); // Dramatic tension
       printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
       break;
+    case 'nyx':
     case 'furry':
       printLine("Species: Unknown Hybrid.");
       printLine("Status: Needs more fluff.", "warning");
