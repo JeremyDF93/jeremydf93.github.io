@@ -1,245 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nyxium Network Systems</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nyxium Network Systems</title>
 
-<meta property="og:title" content="Nyxium Network Systems">
-<meta property="og:type" content="website">
-<meta property="og:description" content="Central Administration Panel and Systems Dashboard.">
-<meta name="theme-color" content="#45ff00">
+  <meta property="og:title" content="Nyxium Network Systems">
+  <meta property="og:type" content="website">
+  <meta property="og:description" content="Central Administration Panel and Systems Dashboard.">
+  <meta name="theme-color" content="#45ff00">
 
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Nyxium Network Systems">
-<meta name="twitter:description" content="Central Administration Panel and Systems Dashboard.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Nyxium Network Systems">
+  <meta name="twitter:description" content="Central Administration Panel and Systems Dashboard.">
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-  body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #0b0c10;
-    overflow-x: hidden; 
-    font-family: 'Press Start 2P', monospace; /* The 8-bit font */
-    color: #45ff00; 
-    font-size: 1rem; /* Needs to be smaller for this font */
-    line-height: 1.5;
-  }
-
-  /* The actual text container */
-  .terminal-content {
-    position: relative;
-    z-index: 1; /* Lowest layer */
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    padding-bottom: 4rem; 
-    
-    /* Subtler RGB Chromatic Aberration + Green Phosphor Glow */
-    text-shadow: 
-      0.5px 0 0 rgba(255, 0, 0, 0.4), 
-      -0.5px 0 0 rgba(0, 0, 255, 0.4), 
-      0 0 5px rgba(69, 255, 0, 0.6);
-  }
-
-  .line {
-    margin: 0.15rem 0;
-    white-space: pre-wrap;
-    line-height: 1.3;
-    word-wrap: break-word; 
-  }
-
-  /* The blinking block cursor */
-  .cursor {
-    display: inline-block;
-    width: 14px; 
-    height: 1.1rem; 
-    background-color: #45ff00;
-    animation: blink 1s step-end infinite;
-    box-shadow: 0 0 5px rgba(69, 255, 0, 0.6);
-    position: relative;
-    top: -2px;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* Status Colors with their own softer RGB aberrations */
-  .error {
-    color: #ff3333;
-    text-shadow: 
-      0.5px 0 0 rgba(0, 255, 0, 0.3), 
-      -0.5px 0 0 rgba(0, 0, 255, 0.3), 
-      0 0 5px rgba(255, 51, 51, 0.6);
-  }
-  
-  .warning {
-    color: #ffb000;
-    text-shadow: 
-      0.5px 0 0 rgba(255, 0, 0, 0.3), 
-      -0.5px 0 0 rgba(0, 255, 0, 0.3), 
-      0 0 5px rgba(255, 176, 0, 0.6);
-  }
-
-  /* ========================================= */
-  /* CRT OVERLAYS - Sitting OVER the text      */
-  /* ========================================= */
-
-  /* 1. The Scanline & RGB Pixel Mesh */
-  .scanlines {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9998; /* High z-index to sit over text */
-    pointer-events: none; /* Lets you click/scroll through it */
-    background: 
-      linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-      linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 4px, 6px 100%;
-  }
-
-  /* 2. Curved Screen Shadow (Vignette) & Flicker */
-  .vignette {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999; /* Highest z-index */
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
-    animation: flicker 0.15s infinite;
-  }
-
-  @keyframes flicker {
-    0% { opacity: 0.98; }
-    50% { opacity: 1; }
-    100% { opacity: 0.98; }
-  }
-
-  /* Mobile Responsiveness */
-  @media (max-width: 768px) {
-    body, html {
-      font-size: 0.8rem;
-    }
-    .terminal-content {
-      padding: 1rem;
-    }
-    .cursor {
-      height: 1rem;
-      width: 10px;
-      top: -1px;
-    }
-  }
-</style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="scanlines"></div>
-<div class="vignette"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
 
-<div class="terminal-content">
-  <div id="output"></div>
-  <div><span id="typing-line"></span><span class="cursor" id="cursor"></span></div>
-</div>
+  <input type="text" id="hidden-input" autocomplete="off" spellcheck="false">
 
-<script>
-  const bootSequence = [
-    "Arch Linux Boot Loader v3.11",
-    "Host: kiwi",
-    "Hardware detection initiated...",
-    "GPU: NVIDIA GeForce RTX 4090 found.",
-    "",
-    "[  OK  ] Mounting file systems...",
-    "[  OK  ] Loading AI image datasets...",
-    "[  OK  ] Compiling Udon VRChat scripts...",
-    "[FAILED] Initializing pfSense network...",
-    "ERROR: Management IP incorrectly requesting DHCP from tagged VLAN 10.",
-    "Bypassing network protocol...",
-    "",
-    "Diagnosing power systems...",
-    "Querying APC Smart-UPS via USB...",
-    "WARNING: Battery capacity at 4%.",
-    "Power redundancy non-existent. Living on the edge.",
-    "",
-    "Attempting to load site administrator profile...",
-    "Kernel panic - not syncing: Motivation core not found. Dumping memory...",
-    "",
-    "Memory successfully dumped...",
-    "Searching for restore point..."
-  ];
+  <div class="terminal-content">
+    <div id="output"></div>
+    <div id="input-line" class="line" style="display: none;"><span id="prompt-text">kiwi@nyxium.io:~$ </span><span id="cmd-text"></span><span class="cursor" id="cursor"></span></div>
+  </div>
 
-  const finalMessage = "No functional state ever existed for [kiwi].";
-  
-  const outputDiv = document.getElementById('output');
-  const typingLine = document.getElementById('typing-line');
-  
-  let lineIndex = 0;
+  <script src="terminal.js"></script>
 
-  function printBootLines() {
-    if (lineIndex < bootSequence.length) {
-      const lineText = bootSequence[lineIndex];
-      const lineElem = document.createElement('div');
-      lineElem.className = 'line';
-      
-      if (lineText.includes('ERROR') || lineText.includes('[FAILED]') || lineText.includes('Kernel panic')) {
-        lineElem.classList.add('error');
-      } else if (lineText.includes('WARNING')) {
-        lineElem.classList.add('warning');
-      }
-
-      lineElem.textContent = lineText;
-      outputDiv.appendChild(lineElem);
-      
-      window.scrollTo(0, document.body.scrollHeight);
-
-      lineIndex++;
-      
-      const delay = lineText === "..." ? 1400 : (Math.random() * 300 + 50);
-      setTimeout(printBootLines, delay);
-    } else {
-      setTimeout(typeFinalMessage, 1800);
-    }
-  }
-
-  function typeFinalMessage() {
-    const spacing = document.createElement('div');
-    spacing.innerHTML = '<br>';
-    outputDiv.appendChild(spacing);
-
-    let charIndex = 0;
-    
-    function typeChar() {
-      if (charIndex < finalMessage.length) {
-        typingLine.textContent += finalMessage.charAt(charIndex);
-        charIndex++;
-        
-        window.scrollTo(0, document.body.scrollHeight);
-        
-        let nextDelay = 80;
-        if (finalMessage.charAt(charIndex - 1) === '.') {
-            nextDelay = 800; 
-        }
-
-        setTimeout(typeChar, nextDelay);
-      }
-    }
-    
-    typeChar();
-  }
-
-  window.onload = () => {
-    setTimeout(printBootLines, 1000);
-  };
-</script>
 </body>
 </html>
