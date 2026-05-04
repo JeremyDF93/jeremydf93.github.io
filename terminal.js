@@ -1,11 +1,21 @@
+const outputDiv = document.getElementById('output');
+const contentContainer = document.querySelector('.terminal-content');
+const inputLineDiv = document.getElementById('input-line');
+const hiddenInput = document.getElementById('hidden-input');
+const cmdText = document.getElementById('cmd-text');
+const cursor = document.getElementById('cursor');
+
+let lineIndex = 0;
+let isTerminalActive = false;
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const bootSequence = [
   "Nyxium OS v3.11 (x86_64 kernel)",
   "Initializing system hardware...",
-  "Detecting GPU....................... NVIDIA RTX 4090",
-  "Checking video memory............... 24GB [ OK ]",
-  "Setting display mode................ 8-Bit Retro [ OK ]",
+  "Detecting GPU..................... NVIDIA RTX 4090",
+  "Checking video memory............. 24GB [ OK ]",
+  "Setting display mode.............. 8-Bit Retro [ OK ]",
   "",
   "Welcome to Nyxium Network Systems",
   "",
@@ -30,16 +40,6 @@ const bootSequence = [
 ];
 
 const finalMessage = "No functional state ever existed for [kiwi].";
-
-const outputDiv = document.getElementById('output');
-const contentContainer = document.querySelector('.terminal-content');
-const inputLineDiv = document.getElementById('input-line');
-const hiddenInput = document.getElementById('hidden-input');
-const cmdText = document.getElementById('cmd-text');
-const cursor = document.getElementById('cursor');
-
-let lineIndex = 0;
-let isTerminalActive = false;
 
 // DYNAMIC BUFFER MANAGER
 // Checks physical pixels instead of line count
@@ -188,6 +188,91 @@ hiddenInput.addEventListener('keydown', async (e) => { // Added async here
   }
 });
 
+const commands = {
+  help: async () => {
+    printLine("Nyxium Systems Shell - Available Commands:");
+    printLine("  whoami   - Print current user status");
+    printLine("  status   - Check hardware/motivation vitals");
+    printLine("  sudo     - Execute command as superuser");
+    printLine("  clear    - Clear terminal output");
+    printLine("  reboot   - Restart system boot sequence");
+  },
+  whoami: async () => {
+    printLine("kiwi - permanently undefined.", "warning");
+  },
+  status: async () => {
+    printLine("Diagnostics:");
+    printLine("- Motivation Core: OFFLINE", "error");
+    printLine("- UPS Battery: 4% (Replace immediately)", "warning");
+    printLine("- Disappointment Level: 100%");
+  },
+  sudo: async () => {
+    printLine("kiwi is not in the sudoers file. This incident will be reported to absolutely nobody.", "error");
+  },
+  clear: async () => {
+    outputDiv.innerHTML = '';
+  },
+  reboot: async () => {
+    printLine("System going down for reboot NOW...", "warning");
+    isTerminalActive = false;
+    inputLineDiv.style.display = 'none';
+    setTimeout(() => location.reload(), 1000);
+  },
+  ls: async () => {
+    printLine("datasets/  scripts/  broken_dreams/  tax_returns_2024.pdf");
+  },
+  dir: async () => {
+    await commands.ls(); // Alias
+  },
+  butts: async () => {
+    printLine("ERROR: Physiological assets not found in current virtual state.", "error");
+  },
+  dicks: async () => {
+    await commands.butts(); // Alias
+  },
+  pony: async () => {
+    printLine("Connecting to areweponyyet.com...");
+    await sleep(5000);
+    printLine("ERR_CONNECTION_TIMED_OUT", "error");
+  },
+  ponies: async () => {
+    await commands.pony(); // Alias
+  },
+  lewd: async () => {
+    printLine("Accessing encrypted vault...");
+    await sleep(2000);
+    printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
+  },
+  lewds: async () => {
+    await commands.lewd(); // Alias
+  },
+  porn: async () => {
+    await commands.lewd(); // Alias
+  },
+  nyx: async () => {
+    printLine(`Loading visual data...`);
+    await sleep(1000);
+    printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
+  },
+  furry: async () => {
+    await commands.nyx(); // Alias
+  },
+  image: async (args) => {
+    if (args[1]) {
+      printLine(`Loading visual data from ${args[1]}...`);
+      await sleep(1000);
+      printImage(args[1]);
+    } else {
+      printLine("Usage: image [url]", "error");
+    }
+  }
+};
+
+window.onload = () => {
+  console.log("window.onload fired");
+  setTimeout(printBootLines, 800);
+};
+
 async function processCommand(cmd) {
   const args = cmd.toLowerCase().split(' ');
   const mainCmd = args[0];
@@ -196,77 +281,15 @@ async function processCommand(cmd) {
 
   await sleep(150);
 
-  switch (mainCmd) {
-    case 'help':
-      printLine("Nyxium Systems Shell - Available Commands:");
-      printLine("  whoami   - Print current user status");
-      printLine("  status   - Check hardware/motivation vitals");
-      printLine("  sudo     - Execute command as superuser");
-      printLine("  clear    - Clear terminal output");
-      printLine("  reboot   - Restart system boot sequence");
-      break;
-    case 'whoami':
-      printLine("kiwi - permanently undefined.", "warning");
-      break;
-    case 'status':
-      printLine("Diagnostics:");
-      printLine("- Motivation Core: OFFLINE", "error");
-      printLine("- UPS Battery: 4% (Replace immediately)", "warning");
-      printLine("- Disappointment Level: 100%");
-      break;
-    case 'sudo':
-      printLine("kiwi is not in the sudoers file. This incident will be reported to absolutely nobody.", "error");
-      break;
-    case 'clear':
-      outputDiv.innerHTML = '';
-      break;
-    case 'reboot':
-      printLine("System going down for reboot NOW...", "warning");
-      isTerminalActive = false;
-      inputLineDiv.style.display = 'none';
-      setTimeout(() => location.reload(), 1000);
-      break;
-    case 'ls':
-    case 'dir':
-      printLine("datasets/  scripts/  broken_dreams/  tax_returns_2024.pdf");
-      break;
-    case 'butts':
-    case 'dicks':
-      printLine("ERROR: Physiological assets not found in current virtual state.", "error");
-      break;
-    case 'pony':
-    case 'ponies':
-      printLine("Connecting to areweponyyet.com...");
-      await sleep(5000); // Dramatic tension
-      printLine("ERR_CONNECTION_TIMED_OUT", "error");
-      break;
-    case 'lewd':
-    case 'lewds':
-    case 'porn':
-      printLine("Accessing encrypted vault...");
-      await sleep(2000); // Dramatic tension
-      printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
-      break;
-    case 'nyx':
-    case 'furry':
-      printLine(`Loading visual data...`);
-      await sleep(1000);
-      printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
-      break;
-    case 'image':
-      if (args[1]) {
-        printLine(`Loading visual data from ${args[1]}...`);
-        await sleep(1000);
-        printImage(args[1]);
-      } else {
-        printLine("Usage: image [url]", "error");
-      }
-      break;
-    default:
-      printLine(`bash: ${mainCmd}: command not found`, "error");
+  const commandFunc = commands[mainCmd];
+  if (commandFunc) {
+    await commandFunc(args);
+  } else {
+    printLine(`bash: ${mainCmd}: command not found`, "error");
   }
 }
 
 window.onload = () => {
+  console.log("window.onload fired");
   setTimeout(printBootLines, 800);
 };
