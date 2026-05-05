@@ -89,6 +89,25 @@ function printImage(url) {
   };
 }
 
+function printIframe(url) {
+  const iframe = document.createElement('iframe');
+  iframe.src = url;
+  iframe.className = 'terminal-iframe';
+  iframe.setAttribute('allow', 'autoplay; fullscreen');
+  
+  const wrapper = document.createElement('div');
+  wrapper.className = 'line';
+  wrapper.appendChild(iframe);
+  outputDiv.appendChild(wrapper);
+
+  iframe.onload = () => trimBuffer();
+  
+  iframe.onerror = () => {
+    printLine(`ERROR: Could not connect to ${url}`, "error");
+    wrapper.remove();
+  };
+}
+
 // --- BOOT SEQUENCE LOGIC ---
 const bootSequence = [
   { text: "Nyxium OS v3.11 (x86_64 kernel)" },
@@ -206,8 +225,8 @@ const commands = {
   },
   pony: async () => {
     printLine("Connecting to areweponyyet.com...");
-    await sleep(5000);
-    printLine("ERR_CONNECTION_TIMED_OUT", "error");
+    await sleep(1000);
+    printIframe("https://areweponyyet.com");
   },
   ponies: async () => {
     await commands.pony();
