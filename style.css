@@ -77,9 +77,9 @@ body, html {
   margin-bottom: 0.2rem;
 }
 
-/* Ensure the first line has some top clearance */
-#output div:first-child {
-  margin-top: 2rem;
+/* Ensure the terminal output has some top clearance */
+#output {
+  padding-top: 2rem;
 }
 
 /* Give the input line some side clearance too */
