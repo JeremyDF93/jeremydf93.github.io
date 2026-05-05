@@ -126,9 +126,13 @@ function printLine(text, cssClass = '') {
   const lineElem = document.createElement('div');
   lineElem.className = 'line ' + cssClass;
   
-  if (text.includes('ERROR') || text.includes('[FAILED]') || text.includes('Kernel panic')) {
+  // More robust, case-insensitive log parsing
+  const errorPattern = /(error|fail|panic|fatal|critical|denied)/i;
+  const warningPattern = /(warning|warn|degraded|unauthorized)/i;
+
+  if (errorPattern.test(text)) {
     lineElem.classList.add('error');
-  } else if (text.includes('WARNING')) {
+  } else if (warningPattern.test(text)) {
     lineElem.classList.add('warning');
   }
 
