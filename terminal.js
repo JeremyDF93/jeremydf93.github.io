@@ -23,7 +23,7 @@ const bootSequence = [
   "[  OK  ] Mounting storage partitions.",
   "[  OK  ] Starting VR network services.",
   "[FAILED] Connecting to pfSense security uplink.",
-  "Warning: Network is running in unprotected mode.",
+  "WARNING: Network is running in unprotected mode.",
   "[  OK  ] Reached target: Multi-User System.",
   "",
   "[[ Power Diagnostic ]]",
@@ -126,9 +126,12 @@ function printLine(text, cssClass = '') {
   const lineElem = document.createElement('div');
   lineElem.className = 'line ' + cssClass;
   
-  // More robust, case-insensitive log parsing
-  const errorPattern = /(error|fail|panic|fatal|critical|denied)/i;
-  const warningPattern = /(warning|warn|degraded|unauthorized)/i;
+  // Only triggers if the word is wrapped in [brackets] or followed immediately by a colon:
+  // MATCHES: "[FAILED]", "ERROR:", "[critical]", "fatal:"
+  // IGNORES: "error_log.txt", "the system failed"
+
+  const errorPattern = /(\[(error|failed|panic|fatal|critical|denied)\]|\b(error|failed|panic|fatal|critical|denied):)/i;
+  const warningPattern = /(\[(warning|warn|degraded|unauthorized)\]|\b(warning|warn|degraded|unauthorized):)/i;
 
   if (errorPattern.test(text)) {
     lineElem.classList.add('error');
