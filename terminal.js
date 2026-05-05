@@ -170,94 +170,156 @@ function activateTerminal() {
 
 // --- COMMAND PROCESSING ---
 const commands = {
-  help: async () => {
-    printLine("Nyxium Systems Shell - Available Commands:");
-    printLine("  whoami   - Print current user status");
-    printLine("  status   - Check hardware/motivation vitals");
-    printLine("  sudo     - Execute command as superuser");
-    printLine("  clear    - Clear terminal output");
-    printLine("  reboot   - Restart system boot sequence");
-    printLine("  say      - Prints text character-by-character");
-  },
-  whoami: async () => {
-    printLine("kiwi - permanently undefined.", "warning");
-  },
-  status: async () => {
-    printLine("Diagnostics:");
-    printLine("- Motivation Core: OFFLINE", "error");
-    printLine("- UPS Battery: 4% (Replace immediately)", "warning");
-    printLine("- Disappointment Level: 100%");
-  },
-  sudo: async () => {
-    printLine("kiwi is not in the sudoers file. This incident will be reported to absolutely nobody.", "error");
-  },
-  clear: async () => {
-    outputDiv.innerHTML = '';
-  },
-  reboot: async () => {
-    printLine("System going down for reboot NOW...", "warning");
-    isTerminalActive = false;
-    inputLineDiv.style.display = 'none';
-    setTimeout(() => location.reload(), 1000);
-  },
-  say: async (args) => {
-    const msg = args.slice(1).join(' ');
-    if (msg) {
-      await typeLine(msg);
-    } else {
-      printLine("Usage: say [message]", "error");
+  help: {
+    description: "List available commands",
+    execute: async () => {
+      printLine("Nyxium Systems Shell - Available Commands:");
+      for (const [cmdName, cmdObj] of Object.entries(commands)) {
+        if (!cmdObj.hidden) {
+          const paddedName = cmdName.padEnd(8, ' ');
+          printLine(`  ${paddedName} - ${cmdObj.description || "No description provided"}`);
+        }
+      }
     }
   },
-  print: async (args) => {
-    await commands.say(args);
+  whoami: {
+    description: "Print current user status",
+    execute: async () => {
+      printLine("kiwi - permanently undefined.", "warning");
+    }
   },
-  ls: async () => {
-    printLine("datasets/  scripts/  broken_dreams/  tax_returns_2024.pdf");
+  status: {
+    description: "Check hardware/motivation vitals",
+    execute: async () => {
+      printLine("Diagnostics:");
+      printLine("- Motivation Core: OFFLINE", "error");
+      printLine("- UPS Battery: 4% (Replace immediately)", "warning");
+      printLine("- Disappointment Level: 100%");
+    }
   },
-  dir: async () => {
-    await commands.ls();
+  sudo: {
+    description: "Execute command as superuser",
+    execute: async () => {
+      printLine("kiwi is not in the sudoers file. This incident will be reported to absolutely nobody.", "error");
+    }
   },
-  butts: async () => {
-    printLine("ERROR: Physiological assets not found in current virtual state.", "error");
+  clear: {
+    description: "Clear terminal output",
+    execute: async () => {
+      outputDiv.innerHTML = '';
+    }
   },
-  dicks: async () => {
-    await commands.butts();
+  reboot: {
+    description: "Restart system boot sequence",
+    execute: async () => {
+      printLine("System going down for reboot NOW...", "warning");
+      isTerminalActive = false;
+      inputLineDiv.style.display = 'none';
+      setTimeout(() => location.reload(), 1000);
+    }
   },
-  pony: async (args) => {
-    const path = args[1] ? `/${args[1]}` : '';
-    printLine(`Connecting to areweponyyet.com${path}...`);
-    await sleep(1000);
-    printIframe(`https://areweponyyet.com${path}`);
+  say: {
+    hidden: true,
+    description: "Prints text character-by-character",
+    execute: async (args) => {
+      const msg = args.slice(1).join(' ');
+      if (msg) {
+        await typeLine(msg);
+      } else {
+        printLine("Usage: say [message]", "error");
+      }
+    }
   },
-  ponies: async (args) => {
-    await commands.pony(args);
+  print: {
+    hidden: true,
+    execute: async (args) => {
+      await commands.say.execute(args);
+    }
   },
-  lewd: async () => {
-    printLine("Accessing encrypted vault...");
-    await sleep(2000);
-    printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
+  ls: {
+    description: "List directory contents",
+    execute: async () => {
+      printLine("datasets/  scripts/  vrc/  tax_returns_2024.pdf");
+    }
   },
-  lewds: async () => {
-    await commands.lewd();
+  dir: {
+    hidden: true,
+    execute: async () => {
+      await commands.ls.execute();
+    }
   },
-  porn: async () => {
-    await commands.lewd();
+  butts: {
+    hidden: true,
+    execute: async () => {
+      printLine("ERROR: Physiological assets not found in current virtual state.", "error");
+    }
   },
-  nyx: async () => {
-    printLine(`Loading visual data...`);
-    await sleep(1000);
-    printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
+  dicks: {
+    hidden: true,
+    execute: async () => {
+      await commands.butts.execute();
+    }
   },
-  furry: async () => {
-    await commands.nyx();
-  },
-  image: async (args) => {
-    if (args[1]) {
-      printLine(`Loading visual data from ${args[1]}...`);
+  pony: {
+    hidden: true,
+    description: "Connect to areweponyyet.com",
+    execute: async (args) => {
+      const path = args[1] ? `/${args[1]}` : '';
+      printLine(`Connecting to areweponyyet.com${path}...`);
       await sleep(1000);
-      printImage(args[1]);
-    } else {
-      printLine("Usage: image [url]", "error");
+      printIframe(`https://areweponyyet.com${path}`);
+    }
+  },
+  ponies: {
+    hidden: true,
+    execute: async (args) => {
+      await commands.pony.execute(args);
+    }
+  },
+  lewd: {
+    hidden: true,
+    execute: async () => {
+      printLine("Accessing encrypted vault...");
+      await sleep(2000);
+      printLine("ERROR: Directory /data/furry/nsfw is corrupted.", "error");
+    }
+  },
+  lewds: {
+    hidden: true,
+    execute: async () => {
+      await commands.lewd.execute();
+    }
+  },
+  porn: {
+    hidden: true,
+    execute: async () => {
+      await commands.lewd.execute();
+    }
+  },
+  nyx: {
+    hidden: true,
+    execute: async () => {
+      printLine(`Loading visual data...`);
+      await sleep(1000);
+      printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
+    }
+  },
+  furry: {
+    hidden: true,
+    execute: async () => {
+      await commands.nyx.execute();
+    }
+  },
+  image: {
+    description: "Load visual data from URL",
+    execute: async (args) => {
+      if (args[1]) {
+        printLine(`Loading visual data from ${args[1]}...`);
+        await sleep(1000);
+        printImage(args[1]);
+      } else {
+        printLine("Usage: image [url]", "error");
+      }
     }
   }
 };
@@ -270,9 +332,9 @@ async function processCommand(cmd) {
 
   await sleep(150);
 
-  const commandFunc = commands[mainCmd];
-  if (commandFunc) {
-    await commandFunc(args);
+  const commandObj = commands[mainCmd];
+  if (commandObj) {
+    await commandObj.execute(args);
   } else {
     printLine(`bash: ${mainCmd}: command not found`, "error");
   }
