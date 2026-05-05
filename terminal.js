@@ -223,13 +223,14 @@ const commands = {
   dicks: async () => {
     await commands.butts();
   },
-  pony: async () => {
-    printLine("Connecting to areweponyyet.com...");
+  pony: async (args) => {
+    const path = args[1] ? `/${args[1]}` : '';
+    printLine(`Connecting to areweponyyet.com${path}...`);
     await sleep(1000);
-    printIframe("https://areweponyyet.com");
+    printIframe(`https://areweponyyet.com${path}`);
   },
-  ponies: async () => {
-    await commands.pony();
+  ponies: async (args) => {
+    await commands.pony(args);
   },
   lewd: async () => {
     printLine("Accessing encrypted vault...");
