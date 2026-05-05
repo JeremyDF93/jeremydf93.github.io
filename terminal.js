@@ -1,3 +1,4 @@
+// --- DOM ELEMENTS ---
 const outputDiv = document.getElementById('output');
 const contentContainer = document.querySelector('.terminal-content');
 const inputLineDiv = document.getElementById('input-line');
@@ -5,41 +6,12 @@ const hiddenInput = document.getElementById('hidden-input');
 const cmdText = document.getElementById('cmd-text');
 const cursor = document.getElementById('cursor');
 
+// --- STATE VARIABLES ---
 let lineIndex = 0;
 let isTerminalActive = false;
 
+// --- UTILITIES ---
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-const bootSequence = [
-  "Nyxium OS v3.11 (x86_64 kernel)",
-  "Initializing system hardware...",
-  "Detecting GPU..................... NVIDIA RTX 4090",
-  "Checking video memory............. 24GB [ OK ]",
-  "Setting display mode.............. 8-Bit Retro [ OK ]",
-  "",
-  "Welcome to Nyxium Network Systems",
-  "",
-  "[  OK  ] Initializing system drivers.",
-  "[  OK  ] Mounting storage partitions.",
-  "[  OK  ] Starting VR network services.",
-  "[FAILED] Connecting to pfSense security uplink.",
-  "WARNING: Network is running in unprotected mode.",
-  "[  OK  ] Reached target: Multi-User System.",
-  "",
-  "[[ Power Diagnostic ]]",
-  "UPS Status: Battery at 4% capacity.",
-  "WARNING: UPS battery is degraded. Replace immediately.",
-  "",
-  "[[ User Session ]]",
-  "Establishing session for: kiwi",
-  "Checking administrator permissions...",
-  "ERROR: Motivation core failed to initialize.",
-  "Kernel panic: System state is 'depressed'.",
-  "Dumping error logs to memory...",
-  "Attempting to find a restore point..."
-];
-
-const finalMessage = "No functional state ever existed for [kiwi].";
 
 // DYNAMIC BUFFER MANAGER
 // Checks physical pixels instead of line count
@@ -57,20 +29,43 @@ function trimBuffer() {
   }
 }
 
-// Re-trim on window resize to ensure nothing is cut off
-window.addEventListener('resize', trimBuffer);
+// --- CORE TERMINAL UI FUNCTIONS ---
+function printLine(text, cssClass = '') {
+  const lineElem = document.createElement('div');
+  lineElem.className = 'line ' + cssClass;
+  
+  lineElem.textContent = text === "" ? '\u00A0' : text;
+  
+  outputDiv.appendChild(lineElem);
+  trimBuffer(); 
+}
 
-function printBootLines() {
-  if (lineIndex < bootSequence.length) {
-    const lineText = bootSequence[lineIndex];
-    printLine(lineText);
-    lineIndex++;
+function typeLine(text, cssClass = '') {
+  return new Promise(resolve => {
+    const lineElem = document.createElement('div');
+    lineElem.className = 'line ' + cssClass;
+
+    outputDiv.appendChild(lineElem);
+
+    let charIndex = 0;
     
-    const delay = lineText === "..." ? 800 : (Math.random() * 150 + 20);
-    setTimeout(printBootLines, delay);
-  } else {
-    setTimeout(typeFinalMessage, 1200);
-  }
+    function typeChar() {
+      if (charIndex < text.length) {
+        lineElem.textContent += text.charAt(charIndex);
+        charIndex++;
+        trimBuffer(); // Check height during typing
+        
+        let nextDelay = 60;
+        if (text.charAt(charIndex - 1) === '.') {
+            nextDelay = 600; 
+        }
+        setTimeout(typeChar, nextDelay);
+      } else {
+        resolve();
+      }
+    }
+    typeChar();
+  });
 }
 
 function printImage(url) {
@@ -85,9 +80,7 @@ function printImage(url) {
   outputDiv.appendChild(wrapper);
 
   // Wait for the image to actually have dimensions before trimming
-  img.onload = () => {
-    trimBuffer();
-  };
+  img.onload = () => trimBuffer();
   
   // If the image fails to load, print an error
   img.onerror = () => {
@@ -96,53 +89,56 @@ function printImage(url) {
   };
 }
 
-function typeFinalMessage() {
-  printLine(""); 
-  const finalElem = document.createElement('div');
-  finalElem.className = 'line';
-  outputDiv.appendChild(finalElem);
+// --- BOOT SEQUENCE LOGIC ---
+const bootSequence = [
+  { text: "Nyxium OS v3.11 (x86_64 kernel)" },
+  { text: "Initializing system hardware..." },
+  { text: "Detecting GPU..................... NVIDIA RTX 4090" },
+  { text: "Checking video memory............. 24GB [ OK ]" },
+  { text: "Setting display mode.............. 8-Bit Retro [ OK ]" },
+  { text: "" },
+  { text: "Welcome to Nyxium Network Systems" },
+  { text: "" },
+  { text: "[  OK  ] Initializing system drivers." },
+  { text: "[  OK  ] Mounting storage partitions." },
+  { text: "[  OK  ] Starting VR network services." },
+  { text: "[FAILED] Connecting to pfSense security uplink.", cssClass: "error" },
+  { text: "WARNING: Network is running in unprotected mode.", cssClass: "warning" },
+  { text: "[  OK  ] Reached target: Multi-User System." },
+  { text: "" },
+  { text: "[[ Power Diagnostic ]]" },
+  { text: "UPS Status: Battery at 4% capacity." },
+  { text: "WARNING: UPS battery is degraded. Replace immediately.", cssClass: "warning" },
+  { text: "" },
+  { text: "[[ User Session ]]" },
+  { text: "Establishing session for: kiwi" },
+  { text: "Checking administrator permissions..." },
+  { text: "ERROR: Motivation core failed to initialize.", cssClass: "error" },
+  { text: "Kernel panic: System state is 'depressed'.", cssClass: "error" },
+  { text: "Dumping error logs to memory..." },
+  { text: "Attempting to find a restore point..." }
+];
 
-  let charIndex = 0;
-  
-  function typeChar() {
-    if (charIndex < finalMessage.length) {
-      finalElem.textContent += finalMessage.charAt(charIndex);
-      charIndex++;
-      trimBuffer(); // Check height during typing
-      
-      let nextDelay = 60;
-      if (finalMessage.charAt(charIndex - 1) === '.') {
-          nextDelay = 600; 
-      }
-      setTimeout(typeChar, nextDelay);
-    } else {
-      setTimeout(activateTerminal, 1000);
-    }
+const finalMessage = "No functional state ever existed for [kiwi].";
+
+function printBootLines() {
+  if (lineIndex < bootSequence.length) {
+    const lineItem = bootSequence[lineIndex];
+    printLine(lineItem.text, lineItem.cssClass || '');
+    lineIndex++;
+    
+    const delay = lineItem.text === "..." ? 800 : (Math.random() * 150 + 20);
+    setTimeout(printBootLines, delay);
+  } else {
+    setTimeout(typeFinalMessage, 1200);
   }
-  typeChar();
 }
 
-function printLine(text, cssClass = '') {
-  const lineElem = document.createElement('div');
-  lineElem.className = 'line ' + cssClass;
-  
-  // Only triggers if the word is wrapped in [brackets] or followed immediately by a colon:
-  // MATCHES: "[FAILED]", "ERROR:", "[critical]", "fatal:"
-  // IGNORES: "error_log.txt", "the system failed"
-
-  const errorPattern = /(\[(error|failed|panic|fatal|critical|denied)\]|\b(error|failed|panic|fatal|critical|denied):)/i;
-  const warningPattern = /(\[(warning|warn|degraded|unauthorized)\]|\b(warning|warn|degraded|unauthorized):)/i;
-
-  if (errorPattern.test(text)) {
-    lineElem.classList.add('error');
-  } else if (warningPattern.test(text)) {
-    lineElem.classList.add('warning');
-  }
-
-  lineElem.textContent = text === "" ? '\u00A0' : text;
-  
-  outputDiv.appendChild(lineElem);
-  trimBuffer(); 
+function typeFinalMessage() {
+  printLine(""); 
+  typeLine(finalMessage).then(() => {
+    setTimeout(activateTerminal, 1000);
+  });
 }
 
 function activateTerminal() {
@@ -153,7 +149,118 @@ function activateTerminal() {
   trimBuffer();
 }
 
-// --- INTERACTIVE TERMINAL LOGIC ---
+// --- COMMAND PROCESSING ---
+const commands = {
+  help: async () => {
+    printLine("Nyxium Systems Shell - Available Commands:");
+    printLine("  whoami   - Print current user status");
+    printLine("  status   - Check hardware/motivation vitals");
+    printLine("  sudo     - Execute command as superuser");
+    printLine("  clear    - Clear terminal output");
+    printLine("  reboot   - Restart system boot sequence");
+    printLine("  say      - Prints text character-by-character");
+  },
+  whoami: async () => {
+    printLine("kiwi - permanently undefined.", "warning");
+  },
+  status: async () => {
+    printLine("Diagnostics:");
+    printLine("- Motivation Core: OFFLINE", "error");
+    printLine("- UPS Battery: 4% (Replace immediately)", "warning");
+    printLine("- Disappointment Level: 100%");
+  },
+  sudo: async () => {
+    printLine("kiwi is not in the sudoers file. This incident will be reported to absolutely nobody.", "error");
+  },
+  clear: async () => {
+    outputDiv.innerHTML = '';
+  },
+  reboot: async () => {
+    printLine("System going down for reboot NOW...", "warning");
+    isTerminalActive = false;
+    inputLineDiv.style.display = 'none';
+    setTimeout(() => location.reload(), 1000);
+  },
+  say: async (args) => {
+    const msg = args.slice(1).join(' ');
+    if (msg) {
+      await typeLine(msg);
+    } else {
+      printLine("Usage: say [message]", "error");
+    }
+  },
+  print: async (args) => {
+    await commands.say(args);
+  },
+  ls: async () => {
+    printLine("datasets/  scripts/  broken_dreams/  tax_returns_2024.pdf");
+  },
+  dir: async () => {
+    await commands.ls();
+  },
+  butts: async () => {
+    printLine("ERROR: Physiological assets not found in current virtual state.", "error");
+  },
+  dicks: async () => {
+    await commands.butts();
+  },
+  pony: async () => {
+    printLine("Connecting to areweponyyet.com...");
+    await sleep(5000);
+    printLine("ERR_CONNECTION_TIMED_OUT", "error");
+  },
+  ponies: async () => {
+    await commands.pony();
+  },
+  lewd: async () => {
+    printLine("Accessing encrypted vault...");
+    await sleep(2000);
+    printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
+  },
+  lewds: async () => {
+    await commands.lewd();
+  },
+  porn: async () => {
+    await commands.lewd();
+  },
+  nyx: async () => {
+    printLine(`Loading visual data...`);
+    await sleep(1000);
+    printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
+  },
+  furry: async () => {
+    await commands.nyx();
+  },
+  image: async (args) => {
+    if (args[1]) {
+      printLine(`Loading visual data from ${args[1]}...`);
+      await sleep(1000);
+      printImage(args[1]);
+    } else {
+      printLine("Usage: image [url]", "error");
+    }
+  }
+};
+
+async function processCommand(cmd) {
+  const args = cmd.split(' ');
+  const mainCmd = args[0].toLowerCase();
+
+  if (!mainCmd) return;
+
+  await sleep(150);
+
+  const commandFunc = commands[mainCmd];
+  if (commandFunc) {
+    await commandFunc(args);
+  } else {
+    printLine(`bash: ${mainCmd}: command not found`, "error");
+  }
+}
+
+// --- EVENT LISTENERS ---
+// Re-trim on window resize to ensure nothing is cut off
+window.addEventListener('resize', trimBuffer);
 
 document.addEventListener('click', () => {
   if (isTerminalActive) hiddenInput.focus();
@@ -171,7 +278,7 @@ hiddenInput.addEventListener('input', (e) => {
 });
 
 // Handle hitting Enter
-hiddenInput.addEventListener('keydown', async (e) => { // Added async here
+hiddenInput.addEventListener('keydown', async (e) => {
   if (e.key === 'Enter' && isTerminalActive) {
     const cmd = hiddenInput.value.trim();
     
@@ -195,107 +302,7 @@ hiddenInput.addEventListener('keydown', async (e) => { // Added async here
   }
 });
 
-const commands = {
-  help: async () => {
-    printLine("Nyxium Systems Shell - Available Commands:");
-    printLine("  whoami   - Print current user status");
-    printLine("  status   - Check hardware/motivation vitals");
-    printLine("  sudo     - Execute command as superuser");
-    printLine("  clear    - Clear terminal output");
-    printLine("  reboot   - Restart system boot sequence");
-  },
-  whoami: async () => {
-    printLine("kiwi - permanently undefined.", "warning");
-  },
-  status: async () => {
-    printLine("Diagnostics:");
-    printLine("- Motivation Core: OFFLINE", "error");
-    printLine("- UPS Battery: 4% (Replace immediately)", "warning");
-    printLine("- Disappointment Level: 100%");
-  },
-  sudo: async () => {
-    printLine("kiwi is not in the sudoers file. This incident will be reported to absolutely nobody.", "error");
-  },
-  clear: async () => {
-    outputDiv.innerHTML = '';
-  },
-  reboot: async () => {
-    printLine("System going down for reboot NOW...", "warning");
-    isTerminalActive = false;
-    inputLineDiv.style.display = 'none';
-    setTimeout(() => location.reload(), 1000);
-  },
-  ls: async () => {
-    printLine("datasets/  scripts/  broken_dreams/  tax_returns_2024.pdf");
-  },
-  dir: async () => {
-    await commands.ls(); // Alias
-  },
-  butts: async () => {
-    printLine("ERROR: Physiological assets not found in current virtual state.", "error");
-  },
-  dicks: async () => {
-    await commands.butts(); // Alias
-  },
-  pony: async () => {
-    printLine("Connecting to areweponyyet.com...");
-    await sleep(5000);
-    printLine("ERR_CONNECTION_TIMED_OUT", "error");
-  },
-  ponies: async () => {
-    await commands.pony(); // Alias
-  },
-  lewd: async () => {
-    printLine("Accessing encrypted vault...");
-    await sleep(2000);
-    printLine("ERROR: Directory /home/kiwi/Downloads/furry/nsfw is corrupted.", "error");
-  },
-  lewds: async () => {
-    await commands.lewd(); // Alias
-  },
-  porn: async () => {
-    await commands.lewd(); // Alias
-  },
-  nyx: async () => {
-    printLine(`Loading visual data...`);
-    await sleep(1000);
-    printImage("https://static1.e621.net/data/32/a4/32a46a95af503b20d6b70e17f7aafa83.jpg");
-  },
-  furry: async () => {
-    await commands.nyx(); // Alias
-  },
-  image: async (args) => {
-    if (args[1]) {
-      printLine(`Loading visual data from ${args[1]}...`);
-      await sleep(1000);
-      printImage(args[1]);
-    } else {
-      printLine("Usage: image [url]", "error");
-    }
-  }
-};
-
-window.onload = () => {
-  console.log("window.onload fired");
-  setTimeout(printBootLines, 800);
-};
-
-async function processCommand(cmd) {
-  const args = cmd.toLowerCase().split(' ');
-  const mainCmd = args[0];
-
-  if (!mainCmd) return;
-
-  await sleep(150);
-
-  const commandFunc = commands[mainCmd];
-  if (commandFunc) {
-    await commandFunc(args);
-  } else {
-    printLine(`bash: ${mainCmd}: command not found`, "error");
-  }
-}
-
+// --- INITIALIZATION ---
 window.onload = () => {
   console.log("window.onload fired");
   setTimeout(printBootLines, 800);
