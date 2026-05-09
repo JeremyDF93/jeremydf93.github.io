@@ -17,7 +17,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // Checks physical pixels instead of line count
 function trimBuffer() {
   // Use clientHeight for the exact "visible" inner area of the window
-  const viewportHeight = window.innerHeight;
+  const viewportHeight = contentContainer.clientHeight;
   
   // While the content height is greater than the window height
   while (contentContainer.scrollHeight > viewportHeight) {
@@ -162,7 +162,7 @@ function typeFinalMessage() {
 
 function activateTerminal() {
   printLine("");
-  inputLineDiv.style.display = 'block';
+  inputLineDiv.style.visibility = 'visible';
   isTerminalActive = true;
   hiddenInput.focus();
   trimBuffer();
@@ -214,8 +214,9 @@ const commands = {
     execute: async () => {
       printLine("System going down for reboot NOW...", "warning");
       isTerminalActive = false;
-      inputLineDiv.style.display = 'none';
-      setTimeout(() => location.reload(), 1000);
+      inputLineDiv.style.visibility = 'hidden';
+      await sleep(2500);
+      location.reload();
     }
   },
   say: {
@@ -370,14 +371,14 @@ hiddenInput.addEventListener('keydown', async (e) => {
     // 2. Clear and hide the input line so it doesn't show during pauses
     hiddenInput.value = '';
     cmdText.textContent = '';
-    inputLineDiv.style.display = 'none'; 
+    inputLineDiv.style.visibility = 'hidden'; 
     isTerminalActive = false; // Lock input during processing
 
     // 3. Wait for the command to fully finish processing
     await processCommand(cmd);
     
     // 4. Bring the input line back once processing is done
-    inputLineDiv.style.display = 'block';
+    inputLineDiv.style.visibility = 'visible';
     isTerminalActive = true;
     hiddenInput.focus();
     trimBuffer();

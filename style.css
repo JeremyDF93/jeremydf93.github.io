@@ -36,10 +36,8 @@ body, html {
 
 .terminal-iframe {
   display: block;
-  width: 100%;
-  max-width: 100%;
-  height: calc(100vh - 12rem);
-  min-height: 200px;
+  width: min(100%, calc(max(200px, 100vh - 12rem) * 16 / 9));
+  aspect-ratio: 16 / 9;
   border: 2px solid #45ff00;
   margin: 1rem 0;
   background-color: #000;
